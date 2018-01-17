@@ -1,0 +1,4 @@
+coverage.txt
+*.bak
+*.json
+test.profile.*
