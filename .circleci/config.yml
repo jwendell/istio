@@ -6,6 +6,11 @@ defaults: &defaults
   environment:
     GOPATH: /go
 
+general:
+  branches:
+    only:
+      - ci
+
 # org context settings. If developing on a clone, please configure:
 
 # DOCKER_USER
@@ -167,7 +172,6 @@ jobs:
 
   codecov:
     <<: *defaults
-    resource_class: xlarge
     environment:
       KUBECONFIG: /go/src/istio.io/istio/.circleci/config
     steps:
@@ -203,7 +207,6 @@ jobs:
     <<: *defaults
     environment:
       KUBECONFIG: /go/src/istio.io/istio/.circleci/config
-    resource_class: xlarge
     steps:
       - checkout
       - run:
@@ -221,7 +224,6 @@ jobs:
     <<: *defaults
     environment:
       KUBECONFIG: /go/src/istio.io/istio/.circleci/config
-    resource_class: xlarge
     steps:
       - checkout
       - run:
@@ -237,7 +239,6 @@ jobs:
 
   build:
     <<: *defaults
-    resource_class: xlarge
     steps:
       - checkout
       - run:
@@ -258,7 +259,6 @@ jobs:
     <<: *defaults
     environment:
       KUBECONFIG: /go/src/istio.io/istio/.circleci/config
-    resource_class: xlarge
     steps:
       - checkout
       - run: make lint
@@ -281,7 +281,6 @@ jobs:
 
   docker-push:
     <<: *defaults
-    resource_class: xlarge
     steps:
       - checkout
       - setup_remote_docker:
@@ -296,7 +295,6 @@ jobs:
 
   goxbuild:
     <<: *defaults
-    resource_class: xlarge
     steps:
       - checkout
       - run:
@@ -312,78 +310,6 @@ jobs:
 
 workflows:
   version: 2
-  nightly:
-    triggers:
-       - schedule:
-           cron: "0 0 * * *"
-           filters:
-             branches:
-               only:
-                 - master
-    jobs: #daisy chained steps ending with docker push
-      - build
-      - test:
-          requires:
-            - build
-      - e2e-simple:
-          requires:
-            - test
-      - e2e-bookinfo:
-          requires:
-            - test
-      - e2e-mixer:
-          requires:
-            - test
-      - e2e-pilot:
-          requires:
-            - test
-      - e2e-pilot-noauth:
-          requires:
-            - test
-      # Compile for mac and arm
-      - goxbuild:
-          requires:
-            - test
-      # Push to dockerhub
-      - docker-push:
-          context: org-global
-          requires:
-            - e2e-bookinfo
-            - e2e-mixer
-            - e2e-pilot
-            - e2e-pilot-noauth
-
-  periodic:
-    triggers:
-       - schedule:
-           cron: "20 1,4,7,10,13,16,19,22 * * *"
-           filters:
-             branches:
-               only:
-                 - master
-    jobs:
-      - build
-      - codecov:
-          requires:
-            - build
-      - test
-      - racetest
-      - e2e-simple:
-          requires:
-            - build
-      - e2e-bookinfo:
-          requires:
-            - build
-      - e2e-mixer:
-          requires:
-            - build
-      - e2e-pilot:
-          requires:
-            - build
-      - e2e-pilot-noauth:
-          requires:
-            - build
-
   all:
     jobs:
       - lint
