@@ -84,7 +84,7 @@ Q = $(if $(filter 1,$V),,@)
 H = $(shell printf "\033[34;1m=>\033[0m")
 
 .PHONY: default
-default: depend build
+default: build
 
 checkvars:
 	@if test -z "$(TAG)"; then echo "TAG missing"; exit 1; fi
@@ -110,7 +110,6 @@ depend.ensure: init
 depend.update: ${DEP} ; $(info $(H) ensuring dependencies are up to date...)
 	${DEP} ensure
 	${DEP} ensure -update
-	cp Gopkg.lock vendor/Gopkg.lock
 
 ${DEP}:
 	unset GOOS && go get -u github.com/golang/dep/cmd/dep
@@ -185,18 +184,18 @@ build: setup go-build
 
 PILOT_GO_BINS:=${ISTIO_BIN}/pilot-discovery ${ISTIO_BIN}/pilot-agent \
                ${ISTIO_BIN}/istioctl ${ISTIO_BIN}/sidecar-initializer
-$(PILOT_GO_BINS): depend
+$(PILOT_GO_BINS):
 	bin/gobuild.sh ${ISTIO_BIN}/$(@F) istio.io/istio/pilot/tools/version ./pilot/cmd/$(@F)
 
 MIXER_GO_BINS:=${ISTIO_BIN}/mixs ${ISTIO_BIN}/mixc
-$(MIXER_GO_BINS): depend
+$(MIXER_GO_BINS):
 	bin/gobuild.sh ${ISTIO_BIN}/$(@F) istio.io/istio/mixer/pkg/version ./mixer/cmd/$(@F)
 
-${ISTIO_BIN}/servicegraph: depend
+${ISTIO_BIN}/servicegraph:
 	bin/gobuild.sh ${ISTIO_BIN}/servicegraph istio.io/istio/mixer/pkg/version ./mixer/example/servicegraph
 
 SECURITY_GO_BINS:=${ISTIO_BIN}/node_agent ${ISTIO_BIN}/istio_ca
-$(SECURITY_GO_BINS): depend
+$(SECURITY_GO_BINS):
 	bin/gobuild.sh ${ISTIO_BIN}/$(@F) istio.io/istio/security/cmd/istio_ca/version ./security/cmd/$(@F)
 
 .PHONY: go-build
@@ -231,7 +230,7 @@ GOSTATIC = -ldflags '-extldflags "-static"'
 
 PILOT_TEST_BINS:=${ISTIO_BIN}/pilot-test-server ${ISTIO_BIN}/pilot-test-client ${ISTIO_BIN}/pilot-test-eurekamirror
 
-$(PILOT_TEST_BINS): depend
+$(PILOT_TEST_BINS):
 	CGO_ENABLED=0 go build ${GOSTATIC} -o ${ISTIO_BIN}/$(@F) istio.io/istio/$(subst -,/,$(@F))
 
 test-bins: $(PILOT_TEST_BINS)
@@ -252,7 +251,7 @@ mixer-test: mixs
 	(cd mixer; go test ${T} ${GOTEST_PARALLEL} ./...)
 
 .PHONY: broker-test
-broker-test: depend
+broker-test:
 	go test ${T} ./broker/...
 
 .PHONY: security-test
@@ -306,7 +305,7 @@ mixer-racetest: mixs
 	(cd mixer; go test ${T} -race ${GOTEST_PARALLEL} ./...)
 
 .PHONY: broker-racetest
-broker-racetest: depend
+broker-racetest:
 	go test ${T} -race ./broker/...
 
 .PHONY: security-racetest
