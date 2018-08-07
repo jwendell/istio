@@ -23,6 +23,7 @@ from json2html import *
 import logging
 import requests
 import os
+import socket
 
 # These two lines enable debugging at httplib level (requests->urllib3->http.client)
 # You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
@@ -181,6 +182,14 @@ def ratingsRoute(product_id):
     status, ratings = getProductRatings(product_id, headers)
     return json.dumps(ratings), status, {'Content-Type': 'application/json'}
 
+# For Debugging:
+@app.route('/debug')
+def dumpDebug():
+    debug = {}
+    debug['Hostname'] = socket.gethostname()
+    debug['Ip'] = socket.gethostbyname_ex(socket.gethostname())[2]
+    debug['Environment'] = dict(os.environ)
+    return json.dumps(debug, indent=2), 200, {'Content-Type': 'application/json'}
 
 
 # Data providers:
