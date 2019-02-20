@@ -823,7 +823,10 @@ dist: dist-bin
 include .circleci/Makefile
 
 # Building the debian file, docker.istio.deb and istio.deb
-include tools/deb/istio.mk
+include tools/packaging/deb/istio.mk
+
+# RPM/RHEL/CENTOS stuff
+include tools/packaging/rpm/rpm.mk
 
 #-----------------------------------------------------------------------------
 # Target: e2e tests

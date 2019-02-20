@@ -42,8 +42,8 @@ ISTIO_DEB_DEST:=${ISTIO_DEB_BIN}/istio-start.sh \
 		/var/lib/istio/envoy/sidecar.env
 
 $(foreach DEST,$(ISTIO_DEB_DEST),\
-        $(eval ${ISTIO_OUT}/istio-sidecar.deb:   tools/deb/$(notdir $(DEST))) \
-        $(eval SIDECAR_FILES+=src/istio.io/istio/tools/deb/$(notdir $(DEST))=$(DEST)))
+        $(eval ${ISTIO_OUT}/istio-sidecar.deb:   tools/packaging/common/$(notdir $(DEST))) \
+        $(eval SIDECAR_FILES+=src/istio.io/istio/tools/packaging/common/$(notdir $(DEST))=$(DEST)))
 
 SIDECAR_FILES+=src/istio.io/istio/tools/deb/envoy_bootstrap_v2.json=/var/lib/istio/envoy/envoy_bootstrap_tmpl.json
 SIDECAR_FILES+=src/istio.io/istio/tools/deb/envoy_bootstrap_drain.json=/var/lib/istio/envoy/envoy_bootstrap_drain.json
@@ -53,7 +53,7 @@ ISTIO_DEB_NAME ?= istio-sidecar
 
 # TODO: rename istio-sidecar.deb to istio.deb
 
-# Note: adding --deb-systemd ${GO_TOP}/src/istio.io/istio/tools/deb/istio.service will result in
+# Note: adding --deb-systemd ${GO_TOP}/src/istio.io/istio/tools/packaging/common/istio.service will result in
 # a /etc/systemd/system/multi-user.target.wants/istio.service and auto-start. Currently not used
 # since we need configuration.
 # --iteration 1 adds a "-1" suffix to the version that didn't exist before
@@ -71,7 +71,7 @@ deb/fpm:
 		--license Apache \
 		--vendor istio.io \
 		--maintainer istio@istio.io \
-		--after-install tools/deb/postinst.sh \
+		--after-install tools/packaging/deb/postinst.sh \
 		--config-files /var/lib/istio/envoy/envoy_bootstrap_tmpl.json \
 		--config-files /var/lib/istio/envoy/sidecar.env \
 		--description "Istio Sidecar" \
@@ -92,7 +92,7 @@ ${ISTIO_OUT}/istio.deb:
 # Install the deb in a docker image, for testing of the install process.
 deb/docker: hyperistio build deb/fpm ${ISTIO_OUT}/istio.deb
 	mkdir -p ${OUT_DIR}/deb
-	cp tools/deb/Dockerfile tools/deb/deb_test.sh ${OUT_DIR}/deb
+	cp tools/packaging/deb/Dockerfile tools/packaging/deb/deb_test.sh ${OUT_DIR}/deb
 	cp tests/testdata/config/*.yaml ${OUT_DIR}/deb
 	cp -a tests/testdata/certs ${OUT_DIR}/deb
 	cp ${ISTIO_OUT}/hyperistio ${OUT_DIR}/deb
@@ -102,7 +102,7 @@ deb/docker: hyperistio build deb/fpm ${ISTIO_OUT}/istio.deb
 	docker build -t istio_deb -f ${OUT_DIR}/deb/Dockerfile ${OUT_DIR}/deb/
 
 deb/test:
-	docker run --cap-add=NET_ADMIN --rm -v ${ISTIO_GO}/tools/deb/deb_test.sh:/tmp/deb_test.sh istio_deb /tmp/deb_test.sh
+	docker run --cap-add=NET_ADMIN --rm -v ${ISTIO_GO}/tools/packaging/deb/deb_test.sh:/tmp/deb_test.sh istio_deb /tmp/deb_test.sh
 
 # For the test, by default use a local pilot.
 # Set it to 172.18.0.1 to run against a pilot or hyperistio running in IDE.
