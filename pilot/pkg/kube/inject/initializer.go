@@ -52,8 +52,7 @@ var (
 
 		{v1.SchemeGroupVersion, &v1.List{}, "lists", "/apis"},
 
-		{openshiftv1.SchemeGroupVersion, &openshiftv1.DeploymentConfig{}, "deploymentconfigs", "/apis"},
-		{openshiftv1.LegacySchemeGroupVersion, &openshiftv1.DeploymentConfig{}, "deploymentconfigs", "/apis"},
+		{openshiftv1.GroupVersion, &openshiftv1.DeploymentConfig{}, "deploymentconfigs", "/apis"},
 	}
 	injectScheme = runtime.NewScheme()
 )
