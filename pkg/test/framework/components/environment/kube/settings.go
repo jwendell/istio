@@ -26,6 +26,9 @@ type Settings struct {
 	// Indicates that the Ingress Gateway is not available. This typically happens in Minikube. The Ingress
 	// component will fall back to node-port in this case.
 	Minikube bool
+
+	// Whether this is being tested in an OpenShift
+	OpenShift bool
 }
 
 func (s *Settings) clone() *Settings {
@@ -39,6 +42,7 @@ func (s *Settings) String() string {
 
 	result += fmt.Sprintf("KubeConfig:      %s\n", s.KubeConfig)
 	result += fmt.Sprintf("MiniKubeIngress: %v\n", s.Minikube)
+	result += fmt.Sprintf("OpenShift:       %v\n", s.OpenShift)
 
 	return result
 }

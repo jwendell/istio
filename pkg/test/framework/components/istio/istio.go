@@ -70,7 +70,7 @@ func Deploy(ctx resource.Context, cfg *Config) (Instance, error) {
 	}
 
 	var err error
-	scopes.CI.Info("=== BEGIN: Deploy Istio (via Helm Template) ===")
+	scopes.CI.Info("=== BEGIN: Deploy Istio ===")
 	defer func() {
 		if err != nil {
 			scopes.CI.Infof("=== FAILED: Deploy Istio ===")
@@ -82,7 +82,12 @@ func Deploy(ctx resource.Context, cfg *Config) (Instance, error) {
 	var i Instance
 	switch ctx.Environment().EnvironmentName() {
 	case environment.Kube:
-		i, err = deploy(ctx, ctx.Environment().(*kube.Environment), *cfg)
+		env := ctx.Environment().(*kube.Environment)
+		if env.Settings().OpenShift {
+			i, err = openshiftDeploy(ctx, env, *cfg)
+		} else {
+			i, err = kubeDeploy(ctx, env, *cfg)
+		}
 	default:
 		err = resource.UnsupportedEnvironment(ctx.Environment())
 	}

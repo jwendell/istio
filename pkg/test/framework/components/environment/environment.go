@@ -19,6 +19,8 @@ const (
 	Native Name = "native"
 	// Kube environment name
 	Kube Name = "kube"
+	// OpenShift environment name
+	OpenShift Name = "openshift"
 )
 
 // Name of environment
@@ -29,11 +31,12 @@ func (n Name) String() string {
 	return string(n)
 }
 
-// environmentNames of supported environments
+// Names returns the list of supported environments
 func Names() []Name {
 	return []Name{
 		Native,
 		Kube,
+		OpenShift,
 	}
 }
 

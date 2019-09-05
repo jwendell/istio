@@ -41,7 +41,7 @@ var _ io.Closer = &kubeComponent{}
 var _ Instance = &kubeComponent{}
 var _ resource.Dumper = &kubeComponent{}
 
-func deploy(ctx resource.Context, env *kube.Environment, cfg Config) (Instance, error) {
+func kubeDeploy(ctx resource.Context, env *kube.Environment, cfg Config) (Instance, error) {
 	scopes.CI.Infof("=== Istio Component Config ===")
 	scopes.CI.Infof("\n%s", cfg.String())
 	scopes.CI.Infof("================================")
@@ -157,6 +157,9 @@ func (i *kubeComponent) Close() (err error) {
 		err = i.environment.Accessor.DeleteNamespace(i.settings.SystemNamespace)
 		if err == nil {
 			err = i.environment.Accessor.WaitForNamespaceDeletion(i.settings.SystemNamespace)
+			if err == nil && i.environment.Settings().OpenShift {
+				err = undeployMaistraOperator(i.environment)
+			}
 		}
 	}
 
