@@ -24,7 +24,7 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/types"
-	"go.uber.org/multierr"
+	"github.com/hashicorp/go-multierror"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
@@ -346,7 +346,7 @@ func (h *handler) Close() (err error) {
 
 	if h.conn != nil {
 		err2 := h.conn.Close()
-		err = multierr.Append(err, err2)
+		err = multierror.Append(err, err2)
 	}
 
 	return
